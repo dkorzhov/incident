@@ -5,8 +5,15 @@ import { defineConfig } from "vitest/config";
 // Переменная без префикса VITE_, чтобы внутренний URL не попадал в браузерный бандл.
 const apiTarget = process.env.API_PROXY_TARGET ?? "http://localhost:8000";
 
+// DMI-12: по умолчанию Vite пишет кэш в `node_modules/.vite`, то есть внутрь
+// worktree. Если dev-сервер запускали в контейнере с bind-mount, каталог остаётся
+// root-owned и ломает уборку worktree (`Permission denied`). VITE_CACHE_DIR
+// выносит кэш за пределы worktree, например `-e VITE_CACHE_DIR=/tmp/vite-cache`.
+const cacheDir = process.env.VITE_CACHE_DIR ?? "node_modules/.vite";
+
 export default defineConfig({
   plugins: [react()],
+  cacheDir,
   server: {
     host: "0.0.0.0",
     port: 5173,

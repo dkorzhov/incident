@@ -92,6 +92,13 @@ jobs:
           docker compose exec -T backend alembic upgrade head
           docker compose exec -T backend ruff check .
           docker compose exec -T backend pytest
+      - name: No caches leaked into worktree (DMI-12)
+        if: hashFiles('e2e/package.json') != ''
+        run: |
+          bash -n scripts/clean-caches.sh
+          scripts/clean-caches.sh --check
+          # Образ выносит кэши в /tmp: в смонтированном worktree их быть не должно.
+          test -z "$(docker compose exec -T backend sh -c 'ls -d /app/.pytest_cache /app/.ruff_cache 2>/dev/null')"
       - name: Playwright
         if: hashFiles('e2e/package.json') != ''
         working-directory: e2e
