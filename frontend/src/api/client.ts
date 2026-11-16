@@ -18,8 +18,11 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // Заголовки вызывающей стороны сохраняются; Accept — только значение по умолчанию.
   const headers = new Headers(init?.headers);
-  headers.set("Accept", "application/json");
+  if (!headers.has("Accept")) {
+    headers.set("Accept", "application/json");
+  }
 
   let response: Response;
   try {
@@ -67,6 +70,7 @@ async function readDetail(response: Response): Promise<string | null> {
 }
 
 export const api = {
-  health: () => request<{ status: string; service: string; version: string }>("/health"),
-  users: () => request<User[]>("/users"),
+  health: (init?: RequestInit) =>
+    request<{ status: string; service: string; version: string }>("/health", init),
+  users: (init?: RequestInit) => request<User[]>("/users", init),
 };

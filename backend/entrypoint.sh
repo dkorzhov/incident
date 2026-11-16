@@ -11,9 +11,12 @@ retry() {
       echo "Команда не удалась после $max_attempts попыток: $*" >&2
       return 1
     fi
-    echo "Ожидание базы данных (попытка $attempt/$max_attempts)..."
+    # Jitter 0–1 c: после рестарта compose несколько контейнеров не должны
+    # одновременно бить по ещё поднимающейся БД.
+    delay=$(python -c 'import random; print(f"{2 + random.uniform(0, 1):.2f}")')
+    echo "Ожидание базы данных (попытка $attempt/$max_attempts, пауза ${delay}s)..."
     attempt=$((attempt + 1))
-    sleep 2
+    sleep "$delay"
   done
 }
 

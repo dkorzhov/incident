@@ -2,7 +2,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 // В Docker прокси смотрит на сервис backend, локально — на localhost.
-const apiTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:8000";
+// Переменная без префикса VITE_, чтобы внутренний URL не попадал в браузерный бандл.
+const apiTarget = process.env.API_PROXY_TARGET ?? "http://localhost:8000";
 
 export default defineConfig({
   plugins: [react()],
