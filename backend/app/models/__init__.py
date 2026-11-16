@@ -3,6 +3,8 @@ from app.models.comment import Comment
 from app.models.history import HistoryEvent, HistoryEventType
 from app.models.incident import (
     DESCRIPTION_MAX_LENGTH,
+    INCIDENT_ID_SERVER_DEFAULT,
+    INCIDENT_NUMBER_FORMAT_FUNCTION,
     INCIDENT_NUMBER_SEQUENCE,
     RESOLUTION_MAX_LENGTH,
     TITLE_MAX_LENGTH,
@@ -15,6 +17,8 @@ from app.models.user import User, UserRole
 
 __all__ = [
     "DESCRIPTION_MAX_LENGTH",
+    "INCIDENT_ID_SERVER_DEFAULT",
+    "INCIDENT_NUMBER_FORMAT_FUNCTION",
     "INCIDENT_NUMBER_SEQUENCE",
     "RESOLUTION_MAX_LENGTH",
     "TITLE_MAX_LENGTH",
