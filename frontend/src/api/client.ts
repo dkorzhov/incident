@@ -6,8 +6,6 @@ import type {
   Incident,
   IncidentCreateBody,
   IncidentDetail,
-  IncidentPriority,
-  IncidentStatus,
   IncidentStatusBody,
   IncidentsQuery,
   IncidentUpdateBody,
@@ -224,11 +222,3 @@ export const api = {
   incidents: incidentsApi,
   dashboard: dashboardApi,
 };
-
-export function isIncidentStatus(value: string): value is IncidentStatus {
-  return value === "New" || value === "In Progress" || value === "Resolved" || value === "Closed";
-}
-
-export function isIncidentPriority(value: string): value is IncidentPriority {
-  return value === "Critical" || value === "High" || value === "Medium" || value === "Low";
-}

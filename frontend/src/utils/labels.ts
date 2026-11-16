@@ -8,11 +8,12 @@ export const STATUS_LABELS: Record<IncidentStatus, string> = {
   Closed: "Закрыт",
 };
 
+/** Подписи приоритетов для интерфейса; значения enum в API не меняются. */
 export const PRIORITY_LABELS: Record<IncidentPriority, string> = {
-  Critical: "Critical",
-  High: "High",
-  Medium: "Medium",
-  Low: "Low",
+  Critical: "Критический",
+  High: "Высокий",
+  Medium: "Средний",
+  Low: "Низкий",
 };
 
 /** CSS-модификатор бейджа статуса: `badge--status-new` и т.д. */

@@ -5,17 +5,22 @@ import { AssigneeText, PriorityBadge, StatusBadge } from "../components/Badges";
 
 describe("Badges", () => {
   it.each([
-    ["Critical", "badge--priority-critical"],
-    ["High", "badge--priority-high"],
-    ["Medium", "badge--priority-medium"],
-    ["Low", "badge--priority-low"],
-  ] as const)("бейдж приоритета %s имеет свой цветовой класс", (priority, modifier) => {
-    render(<PriorityBadge priority={priority} />);
+    ["Critical", "Критический", "badge--priority-critical"],
+    ["High", "Высокий", "badge--priority-high"],
+    ["Medium", "Средний", "badge--priority-medium"],
+    ["Low", "Низкий", "badge--priority-low"],
+  ] as const)(
+    "бейдж приоритета %s подписан по-русски и имеет свой цветовой класс",
+    (priority, label, modifier) => {
+      render(<PriorityBadge priority={priority} />);
 
-    const badge = screen.getByText(priority);
-    expect(badge).toHaveClass("badge", "badge--priority", modifier);
-    expect(badge).toHaveAttribute("data-priority", priority);
-  });
+      const badge = screen.getByText(label);
+      expect(badge).toHaveClass("badge", "badge--priority", modifier);
+      // Значение enum не меняется — по нему UI красит и подписывает бейдж.
+      expect(badge).toHaveAttribute("data-priority", priority);
+      expect(badge).toHaveAttribute("title", `Приоритет: ${label}`);
+    },
+  );
 
   it.each([
     ["New", "badge--status-new"],

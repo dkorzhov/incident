@@ -101,10 +101,12 @@ describe("DashboardPage", () => {
     const resolvedKpi = screen.getByText("Решено сегодня").closest(".kpi") as HTMLElement;
     expect(resolvedKpi).toHaveTextContent("3");
 
-    // Легенда диаграммы показывает все приоритеты, включая нулевые.
+    // Легенда диаграммы показывает все приоритеты по-русски, включая нулевые.
     const chart = screen.getByTestId("priority-chart");
-    expect(chart).toHaveTextContent("Critical");
-    expect(chart).toHaveTextContent("Low");
+    expect(chart).toHaveTextContent("Критический");
+    expect(chart).toHaveTextContent("Высокий");
+    expect(chart).toHaveTextContent("Средний");
+    expect(chart).toHaveTextContent("Низкий");
     expect(chart).toHaveTextContent("8"); // всего инцидентов в by_priority
 
     expect(screen.getByText("Недавняя активность")).toBeInTheDocument();

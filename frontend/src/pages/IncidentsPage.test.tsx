@@ -110,8 +110,11 @@ describe("IncidentsPage — реестр", () => {
     expect(within(resolvedKpi as HTMLElement).getByText("4")).toBeInTheDocument();
 
     const table = within(screen.getByRole("table"));
-    expect(table.getByText("High")).toHaveClass("badge--priority-high");
-    expect(table.getByText("Critical")).toHaveClass("badge--priority-critical");
+    // Подписи приоритетов русские, значения enum — в data-priority.
+    expect(table.getByText("Высокий")).toHaveClass("badge--priority-high");
+    expect(table.getByText("Высокий")).toHaveAttribute("data-priority", "High");
+    expect(table.getByText("Критический")).toHaveClass("badge--priority-critical");
+    expect(table.getByText("Критический")).toHaveAttribute("data-priority", "Critical");
     expect(table.getByText("Новый")).toHaveClass("badge--status-new");
     expect(table.getByText("В работе")).toHaveClass("badge--status-in-progress");
     expect(table.getByText("Иван Петров")).toBeInTheDocument();

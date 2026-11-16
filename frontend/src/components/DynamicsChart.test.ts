@@ -62,4 +62,9 @@ describe("buildDynamics", () => {
 
     expect(points.every((point) => point.created === 0)).toBe(true);
   });
+
+  it("возвращает пустой массив при days <= 0 и не зацикливается", () => {
+    expect(buildDynamics([incident({})], 0, now)).toEqual([]);
+    expect(buildDynamics([incident({})], -5, now)).toEqual([]);
+  });
 });

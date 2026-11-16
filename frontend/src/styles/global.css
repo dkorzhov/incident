@@ -15,12 +15,18 @@
   --shadow: 0 1px 2px rgb(15 35 70 / 6%), 0 8px 24px rgb(15 35 70 / 6%);
   --priority-critical: #d92d20;
   --priority-critical-bg: #fee4e2;
+  --priority-critical-fg: #b42318;
   --priority-high: #dc6803;
   --priority-high-bg: #fef0c7;
-  --priority-medium: #b54708;
+  --priority-high-fg: #b54708;
+  /* Medium — жёлтый (TASK.md §4): акцент для точки/кольца и тёмный янтарный
+     текст для бейджа, иначе жёлтый на pale-yellow фоне нечитаем (1.9:1). */
+  --priority-medium: #eaaa08;
   --priority-medium-bg: #fef7c3;
+  --priority-medium-fg: #8a6100;
   --priority-low: #3538cd;
   --priority-low-bg: #e0e7ff;
+  --priority-low-fg: #3538cd;
   --status-new: #3538cd;
   --status-new-bg: #eaecfb;
   --status-progress: #b54708;
@@ -29,6 +35,8 @@
   --status-resolved-bg: #dcfae6;
   --status-closed: #475467;
   --status-closed-bg: #eaecf0;
+  /* Фон незаполненного кольца диаграммы приоритетов. */
+  --priority-chart-track: #eef2f7;
   --danger: #b42318;
   --danger-bg: #fef3f2;
   --success: #067647;
@@ -551,22 +559,26 @@ h3 {
 
 .badge--priority-critical {
   background: var(--priority-critical-bg);
-  color: var(--priority-critical);
+  color: var(--priority-critical-fg);
+  border: 1px solid var(--priority-critical);
 }
 
 .badge--priority-high {
   background: var(--priority-high-bg);
-  color: var(--priority-high);
+  color: var(--priority-high-fg);
+  border: 1px solid var(--priority-high);
 }
 
 .badge--priority-medium {
   background: var(--priority-medium-bg);
-  color: var(--priority-medium);
+  color: var(--priority-medium-fg);
+  border: 1px solid var(--priority-medium);
 }
 
 .badge--priority-low {
   background: var(--priority-low-bg);
-  color: var(--priority-low);
+  color: var(--priority-low-fg);
+  border: 1px solid var(--priority-low);
 }
 
 .badge--status-new {
@@ -644,11 +656,6 @@ h3 {
   margin: 4px 0 0;
   font-weight: 400;
   line-height: 1.45;
-}
-
-.error {
-  margin-top: 12px;
-  color: var(--danger);
 }
 
 .loading {
@@ -739,9 +746,12 @@ h3 {
   width: 10px;
   height: 10px;
   padding: 0;
+  border: none;
   border-radius: 50%;
 }
 
+/* Точка легенды = акцентный цвет приоритета, тот же, что у сегмента кольца
+   и рамки/акцента бейджа. Текст бейджа берёт отдельный `-fg` для контраста. */
 .priority-chart__dot.badge--priority-critical {
   background: var(--priority-critical);
 }
@@ -751,11 +761,11 @@ h3 {
 }
 
 .priority-chart__dot.badge--priority-medium {
-  background: #eaaa08;
+  background: var(--priority-medium);
 }
 
 .priority-chart__dot.badge--priority-low {
-  background: #6172f3;
+  background: var(--priority-low);
 }
 
 .priority-chart__legend-label {
@@ -899,43 +909,6 @@ h3 {
   font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.45;
-}
-
-/* --- Users -------------------------------------------------------------- */
-
-.user-list {
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.user-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.placeholder {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 24px 28px;
-}
-
-.placeholder h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-
-.placeholder p {
-  margin: 0;
-  color: var(--text-muted);
-  max-width: 70ch;
-  line-height: 1.55;
 }
 
 @media (max-width: 900px) {

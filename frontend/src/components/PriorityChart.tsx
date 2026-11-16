@@ -1,13 +1,16 @@
-import type { PriorityCounts } from "../api/types";
+import type { IncidentPriority, PriorityCounts } from "../api/types";
 import { INCIDENT_PRIORITIES } from "../api/types";
 import { PRIORITY_LABELS, priorityModifier } from "../utils/labels";
 
-/** Цвет сегмента диаграммы — тот же, что у бейджа приоритета. */
-const PRIORITY_COLORS: Record<string, string> = {
-  Critical: "#d92d20",
-  High: "#f79009",
-  Medium: "#eaaa08",
-  Low: "#6172f3",
+/**
+ * Цвет сегмента кольца — ссылка на CSS-переменную, тот же источник, что у
+ * бейджа и точки легенды. Хардкод оттенков живёт только в `global.css`.
+ */
+const PRIORITY_STROKE: Record<IncidentPriority, string> = {
+  Critical: "var(--priority-critical)",
+  High: "var(--priority-high)",
+  Medium: "var(--priority-medium)",
+  Low: "var(--priority-low)",
 };
 
 interface PriorityChartProps {
@@ -25,7 +28,15 @@ export function PriorityChart({ byPriority }: PriorityChartProps) {
     <div className="priority-chart" data-testid="priority-chart">
       <div className="priority-chart__donut">
         <svg viewBox="0 0 140 140" role="img" aria-label="Инциденты по приоритетам">
-          <circle cx="70" cy="70" r={radius} fill="none" stroke="#eef2f7" strokeWidth="18" />
+          <circle
+            className="priority-chart__track"
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke="var(--priority-chart-track)"
+            strokeWidth="18"
+          />
           {total > 0 &&
             INCIDENT_PRIORITIES.map((priority) => {
               const value = byPriority[priority];
@@ -36,11 +47,13 @@ export function PriorityChart({ byPriority }: PriorityChartProps) {
               const segment = (
                 <circle
                   key={priority}
+                  className="priority-chart__segment"
+                  data-priority={priority}
                   cx="70"
                   cy="70"
                   r={radius}
                   fill="none"
-                  stroke={PRIORITY_COLORS[priority] ?? "#94a3b8"}
+                  stroke={PRIORITY_STROKE[priority]}
                   strokeWidth="18"
                   strokeDasharray={`${length} ${circumference - length}`}
                   strokeDashoffset={-offset}
@@ -62,6 +75,7 @@ export function PriorityChart({ byPriority }: PriorityChartProps) {
           <li key={priority} className="priority-chart__legend-item">
             <span
               className={`priority-chart__dot badge ${priorityModifier(priority)}`}
+              data-priority={priority}
               aria-hidden="true"
             />
             <span className="priority-chart__legend-label">{PRIORITY_LABELS[priority]}</span>

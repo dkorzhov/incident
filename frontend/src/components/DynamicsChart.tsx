@@ -29,6 +29,11 @@ function localDateKey(date: Date): string {
  * (закрытый инцидент неизменяем, поэтому время закрытия точное).
  */
 export function buildDynamics(incidents: Incident[], days = 7, now = new Date()): DynamicsPoint[] {
+  // Без guard отрицательное значение сделало бы цикл бесконечным.
+  if (days <= 0) {
+    return [];
+  }
+
   const points: DynamicsPoint[] = [];
   const byKey = new Map<string, DynamicsPoint>();
 

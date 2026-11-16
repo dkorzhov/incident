@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import { ApiError, api, type User } from "../api/client";
+import { api, type User } from "../api/client";
 import { useApiData } from "./useApiData";
 
 interface UsersResult {
@@ -24,9 +24,4 @@ export function useUsers(): UsersResult {
   const users = useMemo(() => data ?? EMPTY_USERS, [data]);
 
   return { users, isLoading, error, reload };
-}
-
-/** Текст ошибки с учётом уже разобранного ApiError. */
-export function describeApiError(cause: unknown, fallback: string): string {
-  return cause instanceof ApiError ? cause.message : fallback;
 }
