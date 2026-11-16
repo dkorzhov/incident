@@ -58,12 +58,13 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Check + build
+      - name: Check + test + build
         if: hashFiles('frontend/package.json') != ''
         working-directory: frontend
         run: |
           npm ci
           npm run check
+          npm test
           npm run build
 
   e2e:
@@ -78,12 +79,28 @@ jobs:
         if: hashFiles('e2e/package.json') != ''
         with:
           node-version: 22
-      - name: Run stack + Playwright
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - name: Run stack
         if: hashFiles('e2e/package.json') != ''
         run: |
           docker compose up -d --build
-          npx --yes wait-on http://localhost:8000/api/users http://localhost:5173 --timeout 120000
-          cd e2e && npm ci && npx playwright install --with-deps chromium && npx playwright test
+          npx --yes wait-on@9.5.1 http-get://localhost:8000/api/health http-get://localhost:5173 --timeout 180000
+      - name: Compose commands from AGENTS.md
+        if: hashFiles('e2e/package.json') != ''
+        run: |
+          docker compose exec -T backend alembic upgrade head
+          docker compose exec -T backend ruff check .
+          docker compose exec -T backend pytest
+      - name: Playwright
+        if: hashFiles('e2e/package.json') != ''
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test
       - name: Compose logs on failure
         if: failure() && hashFiles('e2e/package.json') != ''
-        run: docker compose logs --tail=200
+        run: |
+          docker compose ps
+          docker compose logs --tail=200
