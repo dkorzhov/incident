@@ -1,21 +1,30 @@
-# Incident Tracker Lite
+# IT Incident Tracker (MVP)
 
-Мини-система учёта ИТ-инцидентов с SLA: создание, назначение ответственного,
-конечный автомат статусов, дедлайны по severity, REST API + SPA.
+Единое рабочее место небольшой ИТ-команды: реестр инцидентов, карточки с комментариями
+и автоматической историей, статусы по бизнес-правилам, dashboard.
 
-Полное ТЗ — [TASK.md](TASK.md). Правила для агентов — [AGENTS.md](AGENTS.md).
+Концепция — `docs/IT_Incident_Tracker_Концепция_MVP.docx`, макет — `docs/ui-concept.png`,
+рабочая спецификация — [TASK.md](TASK.md), правила для агентов — [AGENTS.md](AGENTS.md).
 
 ## Запуск
 
 ```sh
-npm ci
-npm run dev        # backend :3000 + frontend :5173
+docker compose up --build     # db + backend (:8000) + frontend (:5173)
 ```
+
+Demo-данные: `SEED_DEMO=true docker compose up --build`.
 
 ## Проверки
 
 ```sh
-npm run check      # Biome + typecheck
-npm test           # unit + HTTP тесты
-npm run test:e2e   # Playwright smoke
+docker compose exec backend pytest          # backend-тесты
+docker compose exec backend ruff check .    # линт backend
+cd frontend && npm run check && npm run build
+cd e2e && npx playwright test               # E2E против поднятого compose
+```
+
+## Миграции
+
+```sh
+docker compose exec backend alembic upgrade head
 ```
