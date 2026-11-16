@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_router
 from app.api.errors import register_error_handlers
+from app.api.openapi import build_openapi_schema
 from app.config import get_settings
 
 
@@ -28,6 +29,9 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api")
     register_error_handlers(app)
+
+    # Схема документирует только те коды, которые API реально возвращает (400, не 422).
+    app.openapi = lambda: build_openapi_schema(app)  # type: ignore[method-assign]
     return app
 
 
