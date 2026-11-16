@@ -7,7 +7,8 @@ interface UsersResult {
   users: User[];
   isLoading: boolean;
   error: string | null;
-  reload: () => void;
+  /** Тот же контракт, что у `useApiData.reload`: промис завершается с запросом. */
+  reload: () => Promise<void>;
 }
 
 const EMPTY_USERS: User[] = [];
