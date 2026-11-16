@@ -1,11 +1,17 @@
 """Инцидент — центральная сущность домена (TASK.md §1).
 
 Идентификатор ``INC-NNN`` генерирует сервер: ``server_default`` колонки ``id``
-берёт следующее значение последовательности ``incident_number_seq`` и форматирует
-его. Последовательность выдаёт номера атомарно, без ``max+1`` и без гонок при
-параллельном создании; при откате транзакции номер «сгорает» (в нумерации
-возможен пропуск) — для человекочитаемого номера это допустимо.
+вызывает функцию ``next_incident_id()``, которая берёт следующее значение
+последовательности ``incident_number_seq`` и форматирует его. Последовательность
+выдаёт номера атомарно, без ``max+1`` и без гонок при параллельном создании;
+при откате транзакции номер «сгорает» (в нумерации возможен пропуск) — для
+человекочитаемого номера это допустимо.
 Решение зафиксировано в ``docs/adr/0002-backend-domain.md``.
+
+Форматирование вынесено в функцию миграцией ``0003_incident_number_padding``:
+``lpad(n::text, 3, '0')`` не только дополнял короткие номера, но и обрезал
+длинные (``1133`` → ``113``), из-за чего 1000-й инцидент падал с нарушением
+первичного ключа. Детали — в ``docs/adr/0003-api-contract.md``.
 """
 
 from __future__ import annotations
@@ -25,10 +31,11 @@ from app.models.user import User
 #: Последовательность, из которой PostgreSQL берёт номер инцидента.
 INCIDENT_NUMBER_SEQUENCE: Final = "incident_number_seq"
 
-#: DEFAULT для ``incidents.id``: ``INC-001``, ``INC-002``, ...
-INCIDENT_ID_SERVER_DEFAULT: Final = text(
-    f"'INC-' || lpad(nextval('{INCIDENT_NUMBER_SEQUENCE}')::text, 3, '0')"
-)
+#: Функция, форматирующая номер ``INC-NNN`` (не обрезает номера >= 1000).
+INCIDENT_NUMBER_FORMAT_FUNCTION: Final = "format_incident_number"
+
+#: DEFAULT для ``incidents.id``: ``INC-001``, ``INC-002``, ... ``INC-1000``.
+INCIDENT_ID_SERVER_DEFAULT: Final = text("next_incident_id()")
 
 TITLE_MAX_LENGTH: Final = 120
 DESCRIPTION_MAX_LENGTH: Final = 2000
