@@ -142,8 +142,11 @@ describe("IncidentDetailPage — карточка", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("В работе")).toHaveClass("badge--status-in-progress");
-    expect(screen.getByText("High")).toHaveClass("badge--priority-high");
+    // Подпись приоритета русская (DMI-8), значение enum осталось в data-priority.
+    expect(screen.getByText("Высокий")).toHaveClass("badge--priority-high");
+    expect(screen.getByText("Высокий")).toHaveAttribute("data-priority", "High");
     expect(screen.getAllByText("Почта")[0]).toHaveClass("badge--category");
+    expect(screen.getAllByText("Почта")[0]).toHaveAttribute("data-category", "Mail");
     expect(screen.getByText(/Ответственный:/)).toHaveTextContent("Иван Петров");
   });
 
