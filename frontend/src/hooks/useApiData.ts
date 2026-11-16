@@ -9,8 +9,12 @@ interface ApiDataState<T> {
 }
 
 interface ApiDataResult<T> extends ApiDataState<T> {
-  /** Повторить запрос, не меняя фильтры. */
-  reload: () => void;
+  /**
+   * Повторить запрос, не меняя фильтры. Промис завершается вместе с запросом —
+   * чтобы карточка могла дождаться свежих данных (например, нового статуса)
+   * до того, как снова разрешит действия.
+   */
+  reload: () => Promise<void>;
 }
 
 /**
@@ -32,12 +36,12 @@ export function useApiData<T>(
   });
   const requestSeq = useRef(0);
 
-  const run = useCallback(() => {
+  const run = useCallback((): Promise<void> => {
     const seq = requestSeq.current + 1;
     requestSeq.current = seq;
     setState((previous) => ({ ...previous, isLoading: true, error: null }));
 
-    loader()
+    return loader()
       .then((data) => {
         if (requestSeq.current === seq) {
           setState({ data, error: null, isLoading: false });
@@ -55,7 +59,7 @@ export function useApiData<T>(
   }, [loader, fallbackError]);
 
   useEffect(() => {
-    run();
+    void run();
     // Сбрасываем счётчик при размонтировании: поздние ответы не трогают state.
     return () => {
       requestSeq.current += 1;
