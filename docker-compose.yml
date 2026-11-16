@@ -45,7 +45,9 @@ services:
     build: ./frontend
     restart: unless-stopped
     environment:
-      VITE_API_PROXY_TARGET: http://backend:8000
+      # Не VITE_*: внутренний адрес backend нужен только dev-серверу (прокси),
+      # в браузерный JS он не должен попадать.
+      API_PROXY_TARGET: http://backend:8000
     ports:
       - "5173:5173"
     depends_on:

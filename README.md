@@ -73,7 +73,10 @@ npm run dev
 | `DATABASE_URL` | backend | `postgresql+psycopg://incident:incident@localhost:5432/incident` |
 | `TEST_DATABASE_URL` | backend (тесты) | не задана — тесты идут в `DATABASE_URL` |
 | `CORS_ORIGINS` | backend | `http://localhost:5173` |
-| `VITE_API_PROXY_TARGET` | frontend | `http://localhost:8000` (в compose — `http://backend:8000`) |
+| `API_PROXY_TARGET` | frontend (Vite-прокси) | `http://localhost:8000` (в compose — `http://backend:8000`) |
+| `SEED_DEMO` | backend | `false` (демо-данные — отдельным тикетом) |
+
+Шаблон — [`.env.example`](.env.example); `.env` в `.gitignore` и не коммитится.
 
 ## Миграции
 
