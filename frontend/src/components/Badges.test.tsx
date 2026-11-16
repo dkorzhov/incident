@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { AssigneeText, PriorityBadge, StatusBadge } from "../components/Badges";
+import { AssigneeText, CategoryBadge, PriorityBadge, StatusBadge } from "../components/Badges";
 
 describe("Badges", () => {
   it.each([
@@ -42,6 +42,27 @@ describe("Badges", () => {
 
     rerender(<AssigneeText assignee={null} />);
     expect(screen.getByText("Не назначен")).toHaveClass("table__muted");
+  });
+
+  it.each([
+    ["Network", "Сеть"],
+    ["Mail", "Почта"],
+    ["Portal", "Портал"],
+    ["Database", "База данных"],
+    ["Workplace", "Рабочее место"],
+    ["Other", "Другое"],
+  ] as const)("бейдж категории %s подписан по-русски и имеет свой класс", (category, label) => {
+    render(<CategoryBadge category={category} />);
+
+    const badge = screen.getByText(label);
+    expect(badge).toHaveClass(
+      "badge",
+      "badge--category",
+      `badge--category-${category.toLowerCase()}`,
+    );
+    // Значение enum в API не переводится — по нему красится и подписывается бейдж.
+    expect(badge).toHaveAttribute("data-category", category);
+    expect(badge).toHaveAttribute("title", `Категория: ${label}`);
   });
 });
 

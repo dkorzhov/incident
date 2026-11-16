@@ -210,7 +210,7 @@ describe("IncidentCreatePage — форма создания", () => {
     expect(screen.getByLabelText("Название")).toHaveValue("Не работает почта");
   });
 
-  it("предупреждает, когда текущий пользователь не выбран", async () => {
+  it("предупреждает и блокирует создание, когда текущий пользователь не выбран", async () => {
     setCurrentUserId(null);
     mockApi();
     renderPage();
@@ -218,5 +218,7 @@ describe("IncidentCreatePage — форма создания", () => {
     expect(
       await screen.findByText(/Текущий пользователь не выбран/, undefined, { timeout: 2000 }),
     ).toBeInTheDocument();
+    // Без X-User-Id сервер вернёт 400 — кнопка недоступна.
+    expect(screen.getByRole("button", { name: "Создать инцидент" })).toBeDisabled();
   });
 });
