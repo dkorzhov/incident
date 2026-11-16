@@ -15,6 +15,7 @@
 backend/    FastAPI, SQLAlchemy 2, Alembic (migrations/), Pytest (tests/)
 frontend/   React + TypeScript + Vite, Biome + tsc, Vitest
 e2e/        Playwright-сценарии (против поднятого compose)
+scripts/    clean-caches.sh — кэши тестов/линта вне worktree (DMI-12)
 docs/       концепция, макет UI, спеки и ADR
 ```
 
@@ -71,11 +72,48 @@ cd frontend && npm ci && npm run check      # Biome + tsc
 cd frontend && npm test                     # Vitest
 cd frontend && npm run build                # сборка
 cd e2e && npm ci && npx playwright test     # E2E против поднятого compose
+scripts/clean-caches.sh --check             # в worktree не должно быть кэшей
 ```
 
 Backend-тесты работают на отдельной БД `incident_test` (`TEST_DATABASE_URL`), которую backend
 создаёт и мигрирует при старте. Если БД ещё не готова — выполните `alembic upgrade head`.
 Локально без Docker задайте `TEST_DATABASE_URL` явно (см. ниже).
+
+### Кэши в worktree (DMI-12)
+
+`pytest`, `ruff` и Vite пишут кэш рядом с кодом (`backend/.pytest_cache`,
+`backend/.ruff_cache`, `frontend/node_modules/.vite`). В контейнере, куда смонтирован
+worktree, эти каталоги создаются от **root**, и после мержа `git worktree remove` /
+`orca worktree rm` падают с `Permission denied` — уборка требует `sudo`.
+
+Два уровня защиты:
+
+- **Образ backend не пишет кэш в bind-mount**: в `backend/Dockerfile` заданы
+  `RUFF_CACHE_DIR=/tmp/ruff-cache`, `PYTEST_ADDOPTS="-o cache_dir=/tmp/pytest-cache"`,
+  `HOME=/tmp`. Для Vite есть `VITE_CACHE_DIR` (по умолчанию `node_modules/.vite`).
+- **Скрипт-уборка без sudo**: `scripts/clean-caches.sh` удаляет кэши одноразовым
+  контейнером с примонтированным корнем репозитория — права root внутри контейнера
+  совпадают с правами создавшего файлы процесса.
+
+```sh
+scripts/clean-caches.sh                 # удалить кэши
+scripts/clean-caches.sh --check         # exit 1, если кэши остались (для CI и перед PR)
+scripts/clean-caches.sh --dry-run       # только показать, что будет удалено
+```
+
+Если запускаете инструменты вручную в контейнере, передавайте uid/gid и выносите кэш:
+
+```sh
+docker build -t incident-backend ./backend
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD/backend:/app" -w /app incident-backend pytest
+```
+
+Проверка перед сдачей задачи:
+
+```sh
+scripts/clean-caches.sh --check && ls -ld backend/.pytest_cache backend/.ruff_cache
+```
 
 ## Разработка без Docker
 
@@ -121,3 +159,18 @@ docker compose exec backend alembic revision --autogenerate -m "add incidents"
 `.github/workflows/ci.yml` — три job'а: `backend` (ruff + миграции + pytest на сервисном
 Postgres), `frontend` (Biome + tsc + Vitest + сборка), `e2e` (поднимает compose, прогоняет
 команды из AGENTS.md внутри контейнеров и Playwright).
+
+## Stacked PR
+
+Если ветка `B` стоит на ветке `A` (stacked PR), squash-мерж `A` ломает `B`: GitHub
+пересоздаёт коммиты, закрывает stacked PR, и переоткрыть или перецелить его нельзя.
+Либо мержим базу без squash (`gh pr merge <A> --merge` / `--rebase`), либо сразу
+переписываем `B` на `main`:
+
+```sh
+git fetch origin
+git rebase --onto origin/main <last-commit-of-A> feat/DMI-B-...
+git push --force-with-lease origin feat/DMI-B-...
+```
+
+Подробности и обоснование — в `AGENTS.md` («Stacked PR и squash-мерж базы»).
