@@ -244,7 +244,13 @@ export function IncidentCreatePage() {
         )}
 
         <div className="form__actions">
-          <button type="submit" className="button button--primary" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="button button--primary"
+            // Без X-User-Id сервер отклонит создание (400) — не предлагаем
+            // действие, которое заведомо провалится.
+            disabled={isSubmitting || currentUserId === null}
+          >
             {isSubmitting ? "Создаём…" : "Создать инцидент"}
           </button>
           <Link className="button button--secondary" to="/incidents">

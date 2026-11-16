@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { HistoryEvent } from "../api/types";
 import { describeHistoryEvent, HISTORY_TYPE_LABELS } from "../utils/history";
 import { formatDateTime } from "../utils/labels";
@@ -15,6 +17,10 @@ interface HistoryListProps {
  * «поле: было → стало».
  */
 export function HistoryList({ events }: HistoryListProps) {
+  // Свежие события сверху: так последнее действие видно без прокрутки.
+  // Копия и разворот — только при смене данных, а не на каждом рендере.
+  const ordered = useMemo(() => [...events].reverse(), [events]);
+
   if (events.length === 0) {
     return (
       <StateMessage
@@ -23,9 +29,6 @@ export function HistoryList({ events }: HistoryListProps) {
       />
     );
   }
-
-  // Свежие события сверху: так последнее действие видно без прокрутки.
-  const ordered = [...events].reverse();
 
   return (
     <ol className="history-list">
