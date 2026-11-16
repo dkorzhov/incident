@@ -14,5 +14,6 @@ __pycache__/
 .env.*
 *.log
 *:Zone.Identifier
+.opencode/
 *.egg-info/
 .DS_Store
