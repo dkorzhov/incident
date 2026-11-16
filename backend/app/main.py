@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_router
+from app.api.errors import register_error_handlers
 from app.config import get_settings
 
 
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router, prefix="/api")
+    register_error_handlers(app)
     return app
 
 
