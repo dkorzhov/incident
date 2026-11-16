@@ -1,47 +1,64 @@
-# AGENTS.md — Incident Tracker Lite
+# AGENTS.md — IT Incident Tracker (MVP)
 
-Мини-система учёта ИТ-инцидентов с SLA. **Источник истины по требованиям — `TASK.md`.**
-Не расширяй скоуп: разделы 5 (что НЕ входит) и 6 (стретчи) обязательны к соблюдению.
+**Источник истины по требованиям — `TASK.md`** (оригинал концепции — в `docs/`, макет UI — `docs/ui-concept.png`).
+Не расширяй скоуп: раздел 8 TASK.md обязателен к соблюдению. SLA в проекте НЕТ.
 
-## Стек (зафиксирован)
+## Стек (зафиксирован концепцией)
 
-- Монорепо на npm workspaces: `backend/`, `frontend/`. TypeScript strict везде.
-- Backend: **Fastify 5 + better-sqlite3** (SQLite-файл, в тестах — in-memory). Без аутентификации.
-- Frontend: **React + Vite**, обычный CSS без дизайн-фреймворков. Только реальный API, без моков.
-- Тесты: **Vitest** (unit + HTTP через `fastify.inject`), **Playwright** (один smoke-сценарий).
-- Линт/формат: **Biome** (единый инструмент, конфиг в корне).
+- Backend: **Python 3.12 + FastAPI + SQLAlchemy 2 + PostgreSQL 16**, миграции **Alembic**.
+- Frontend: **React + TypeScript + Vite**, обычный CSS (ориентир — макет), без дизайн-фреймворков.
+- Тесты: **Pytest** (backend, БД — отдельная тестовая схема/контейнер), **Playwright** (e2e/).
+- Линт: **ruff** (backend), **Biome + tsc** (frontend).
+- Запуск: **Docker Compose** (db + backend + frontend).
 
-## Команды (запускать из корня)
+## Команды
 
 | Команда | Что делает |
 |---|---|
-| `npm ci` | установка зависимостей |
-| `npm run check` | Biome + typecheck (`tsc -b`) |
-| `npm test` | все unit/HTTP тесты (Vitest) |
-| `npm run build` | сборка backend + frontend |
-| `npm run dev` | backend (:3000) + frontend (:5173) одновременно |
-| `npm run test:e2e` | Playwright smoke (поднимает серверы сам) |
+| `docker compose up --build` | поднять всё приложение (db + api + web) |
+| `docker compose exec backend pytest` | backend-тесты |
+| `docker compose exec backend alembic upgrade head` | миграции |
+| `docker compose exec backend ruff check .` | линт backend |
+| `cd frontend && npm ci && npm run check` | линт + typecheck frontend |
+| `cd frontend && npm run build` | сборка frontend |
+| `cd e2e && npm ci && npx playwright test` | E2E (против поднятого compose) |
+
+Перед завершением задачи: backend-тесты + frontend check/build зелёные локально и в CI.
+
+## Роли агентов (концепция, §7)
+
+| Агент | Роль | Права |
+|---|---|---|
+| `analyst` | требования, user stories, критерии приёмки | read-only, пишет только в `docs/` |
+| `architect` | архитектура, API-контракт, схема БД, ADR | read-only, пишет только в `docs/` |
+| `backend` | FastAPI, бизнес-логика, миграции, Pytest | правит `backend/`, не трогает `frontend/` |
+| `frontend` | React, интерфейс, интеграция с API | правит `frontend/`, не трогает `backend/` |
+| `qa` | тест-кейсы, автотесты, поиск дефектов | правит только тесты (`backend/tests/`, `e2e/`), модель другая |
+
+Конвейер: analyst → architect → backend → frontend → qa. Каждый этап — отдельная сессия/worker
+со своим агентом; результаты предыдущего этапа читаются из `docs/` и кода.
 
 ## Правила работы
 
 1. **Одна задача Linear = одна ветка = один PR.** Ветка: `feat/DMI-<номер>-<slug>`.
-2. Прямые пуши в `main` запрещены. PR создаётся через `gh pr create`, мержит человек.
-3. Коммиты — conventional commits (`feat:`, `fix:`, `test:`, `chore:`).
-4. Перед завершением задачи ОБЯЗАТЕЛЬНО прогнать локально: `npm run check && npm test && npm run build`. Зелёный CI — условие готовности.
-5. Валидация, автомат статусов и SLA — по `TASK.md` §1–2. Недопустимый переход статуса → 409. `is_overdue` вычисляется на лету, не хранится.
-6. Каждый эндпоинт покрыт тестами (минимумы — в `TASK.md` §2). Не удаляй и не ослабляй существующие тесты ради «зелёного» прогона.
-7. Ошибки API — 400 с описанием полей; фронтенд показывает их понятным текстом, сетевые ошибки не глотает.
-8. Секреты и `.env` не коммитить. Прод-ключей в окружении нет и не должно быть.
+2. Прямые пуши в `main` запрещены (branch protection). PR через `gh pr create`, мержит человек.
+3. Коммиты — conventional commits (`feat:`, `fix:`, `test:`, `chore:`, `docs:`).
+4. Бизнес-правила проверяются на backend, не только в UI (TASK.md §2). Closed неизменяем, удаления нет.
+5. Каждое значимое изменение — автоматическая запись в историю; не забывай payload «было/стало».
+6. Не удаляй и не ослабляй существующие тесты ради «зелёного» прогона.
+7. Текущий пользователь — заголовок `X-User-Id`, валидируется против списка users.
+8. Секреты и `.env` не коммитить.
 
 ## Структура
 
 ```
-backend/    src/ (routes, domain, storage), test/
-frontend/   src/ (components, api), e2e/
-TASK.md     полное ТЗ
+backend/    app/ (api, domain, models, services), migrations/, tests/
+frontend/   src/ (components, pages, api)
+e2e/        Playwright-сценарии
+docs/       концепция (docx), макет (ui-concept.png), ADR и спеки агентов
+TASK.md     рабочая спецификация
 ```
 
-## Линейные ссылки
+## Linear
 
-- Команда Linear: `DMI`. Проект: Incident Tracker Lite.
-- В описании PR указывай идентификатор тикета (DMI-NNN) — интеграция GitHub↔Linear свяжет их автоматически.
+Команда `DMI`, проект Incident Tracker Lite. В описании PR указывай DMI-NNN.

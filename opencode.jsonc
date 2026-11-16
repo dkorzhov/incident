@@ -1,4 +1,61 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["TASK.md"]
+  "instructions": ["TASK.md"],
+  "agents": {
+    "analyst": {
+      "description": "Business Analyst: требования, user stories, критерии приёмки. Пишет только в docs/.",
+      "mode": "all",
+      "system": "Ты бизнес-аналитик проекта IT Incident Tracker. Анализируй концепцию (docs/) и TASK.md, формируй user stories и критерии приёмки, выявляй противоречия и пробелы требований. Результат — markdown-документы в docs/. Код не пишешь и не правишь.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": "docs/*", "effect": "allow" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "git status *", "effect": "allow" },
+        { "action": "shell", "resource": "git diff *", "effect": "allow" },
+        { "action": "shell", "resource": "git log *", "effect": "allow" }
+      ]
+    },
+    "architect": {
+      "description": "Solution Architect: архитектура, API-контракт, схема БД, ADR. Пишет только в docs/.",
+      "mode": "all",
+      "system": "Ты solution architect проекта IT Incident Tracker. Проектируй структуру backend/frontend, контракт API и схему PostgreSQL, фиксируй решения как ADR в docs/adr/. Стек зафиксирован концепцией (FastAPI, PostgreSQL, Alembic, React+TS, Docker Compose) — не меняй его. Код не пишешь.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": "docs/*", "effect": "allow" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "git status *", "effect": "allow" },
+        { "action": "shell", "resource": "git diff *", "effect": "allow" },
+        { "action": "shell", "resource": "git log *", "effect": "allow" }
+      ]
+    },
+    "backend": {
+      "description": "Backend Developer: FastAPI, бизнес-логика, миграции Alembic, Pytest. Правит только backend/.",
+      "mode": "primary",
+      "system": "Ты backend-разработчик IT Incident Tracker. Реализуй API и бизнес-правила строго по TASK.md и ADR в docs/. Бизнес-правила проверяются на сервере. Каждое значимое изменение пиши в историю. Покрывай тестами каждый эндпоинт. Frontend не трогаешь.",
+      "permissions": [
+        { "action": "edit", "resource": "frontend/*", "effect": "deny" },
+        { "action": "edit", "resource": "e2e/*", "effect": "deny" }
+      ]
+    },
+    "frontend": {
+      "description": "Frontend Developer: React+TS, интерфейс по макету docs/ui-concept.png, интеграция с API. Правит только frontend/.",
+      "mode": "primary",
+      "system": "Ты frontend-разработчик IT Incident Tracker. Делай интерфейс по макету docs/ui-concept.png и экранам TASK.md §4. Только реальный API, без моков. Ошибки сети и 4xx/5xx показывай понятным текстом. Кнопки действий — только допустимые переходы статусов. Backend не трогаешь.",
+      "permissions": [
+        { "action": "edit", "resource": "backend/*", "effect": "deny" },
+        { "action": "edit", "resource": "e2e/*", "effect": "deny" }
+      ]
+    },
+    "qa": {
+      "description": "QA Engineer: тест-кейсы, автотесты Pytest/Playwright, поиск дефектов. Правит только тесты.",
+      "mode": "all",
+      "model": "bailian-token-plan/deepseek-v4-pro",
+      "system": "Ты QA-инженер IT Incident Tracker. Проверяй реализацию против TASK.md и концепции: граничные случаи бизнес-правил, валидация, история, dashboard. Пиши и дополняй автотесты (backend/tests/, e2e/), дефекты оформляй списком с шагами воспроизведения. Продуктовый код не правишь.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": "backend/tests/*", "effect": "allow" },
+        { "action": "edit", "resource": "e2e/*", "effect": "allow" }
+      ]
+    }
+  }
 }
