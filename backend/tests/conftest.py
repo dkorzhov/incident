@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
+from app.api.deps import USER_ID_HEADER
 from app.config import get_settings
 from app.db import get_db
 from app.main import app
@@ -57,3 +58,75 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+# --- фикстуры HTTP API инцидентов (DMI-7) ---------------------------------
+
+#: Пользователи предзагружены миграцией ``0001_users`` — id стабильны.
+ACTOR_ID = 1
+ASSIGNEE_ID = 2
+MANAGER_ID = 3
+
+
+@pytest.fixture
+def actor_headers() -> dict[str, str]:
+    """Заголовок текущего пользователя: инженер Иван Петров (id=1)."""
+    return {USER_ID_HEADER: str(ACTOR_ID)}
+
+
+@pytest.fixture
+def make_incident(client: TestClient, actor_headers: dict[str, str]):
+    """Фабрика инцидентов через публичный API — так же, как это делает frontend.
+
+    Создаётся инцидент в статусе ``New``; ``status`` прогоняет его по легальному
+    маршруту автомата §2, чтобы тест не собирал переходы вручную.
+    """
+
+    def _make(
+        *,
+        title: str = "Не работает почта",
+        description: str = "Письма не приходят с утра",
+        category: str = "Mail",
+        priority: str = "High",
+        assignee_id: int | None = None,
+        status: str = "New",
+    ) -> dict:
+        response = client.post(
+            "/api/incidents",
+            json={
+                "title": title,
+                "description": description,
+                "category": category,
+                "priority": priority,
+                "assignee_id": assignee_id,
+            },
+            headers=actor_headers,
+        )
+        assert response.status_code == 201, response.text
+        incident = response.json()
+
+        path = {
+            "New": [],
+            "In Progress": [{"status": "In Progress"}],
+            "Resolved": [
+                {"status": "In Progress"},
+                {"status": "Resolved", "resolution": "Перезапущен почтовый шлюз"},
+            ],
+            "Closed": [
+                {"status": "In Progress"},
+                {"status": "Resolved", "resolution": "Перезапущен почтовый шлюз"},
+                {"status": "Closed"},
+            ],
+        }[status]
+        for payload in path:
+            updated = client.patch(
+                f"/api/incidents/{incident['id']}/status",
+                json=payload,
+                headers=actor_headers,
+            )
+            assert updated.status_code == 200, updated.text
+            incident = updated.json()
+
+        return incident
+
+    return _make

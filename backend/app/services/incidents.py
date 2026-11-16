@@ -300,14 +300,26 @@ def _resolution_for(target: IncidentStatus, value: Any) -> str | None:
     return clean_text(value, field="resolution", max_length=RESOLUTION_MAX_LENGTH)
 
 
+def get_incident_comments(db: Session, incident_id: str) -> Sequence[Comment]:
+    """Комментарии инцидента в хронологическом порядке (404, если инцидента нет)."""
+    incident = get_incident(db, incident_id)
+    return db.scalars(
+        select(Comment)
+        .options(joinedload(Comment.author))
+        .where(Comment.incident_id == incident.id)
+        .order_by(Comment.created_at, Comment.id)
+    ).unique().all()
+
+
 def get_incident_history(db: Session, incident_id: str) -> Sequence[HistoryEvent]:
     """История инцидента в хронологическом порядке."""
     incident = get_incident(db, incident_id)
     return db.scalars(
         select(HistoryEvent)
+        .options(joinedload(HistoryEvent.actor))
         .where(HistoryEvent.incident_id == incident.id)
         .order_by(HistoryEvent.created_at, HistoryEvent.id)
-    ).all()
+    ).unique().all()
 
 
 def add_comment(db: Session, incident_id: str, data: CommentCreate, *, actor: User) -> Comment:
@@ -333,6 +345,7 @@ __all__ = [
     "change_status",
     "create_incident",
     "get_incident",
+    "get_incident_comments",
     "get_incident_for_update",
     "get_incident_history",
     "list_incidents",

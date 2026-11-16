@@ -31,6 +31,36 @@ docker compose up --build     # db :5432 + backend :8000 + frontend :5173
 Демо-данные (`SEED_DEMO=true`) появятся отдельным тикетом — сейчас справочник `users`
 заполняется первой миграцией.
 
+## API
+
+Все эндпоинты — под `/api`; ответы в `snake_case`, Swagger/OpenAPI — на `/docs`
+и `/openapi.json`. Контракт ошибок и решения по нему: `docs/adr/0003-api-contract.md`.
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| `GET` | `/api/incidents` | Реестр: `?q=` (номер и название), `?status=`, `?priority=`; сортировка `created_at` desc |
+| `POST` | `/api/incidents` | Создать: `title`, `description`, `category`, `priority`, `assignee_id?` |
+| `GET` | `/api/incidents/{id}` | Карточка: инцидент + `comments` + `history` + `allowed_transitions` |
+| `PATCH` | `/api/incidents/{id}` | `title`, `description`, `category`, `priority`, `assignee_id` |
+| `PATCH` | `/api/incidents/{id}/status` | `{ status, resolution? }` — по автомату §2 |
+| `POST` | `/api/incidents/{id}/comments` | `{ text }`, автор — текущий пользователь |
+| `GET` | `/api/dashboard` | `counts`, `by_priority`, `recent_activity` (10 событий) |
+| `GET` | `/api/users` | Справочник сотрудников |
+
+Текущий пользователь передаётся заголовком `X-User-Id` (id из `/api/users`).
+Он обязателен для `POST`/`PATCH`/комментариев; чтение доступно без заголовка.
+
+Коды ошибок: `400` — некорректные данные (`{"detail": ..., "errors": [{"field", "reason"}]}`),
+`404` — инцидент не найден, `409` — недопустимый переход статуса или изменение закрытого
+инцидента. Удаления инцидентов и пагинации в MVP нет.
+
+```sh
+curl -s localhost:8000/api/incidents
+curl -s -X POST localhost:8000/api/incidents \
+  -H 'Content-Type: application/json' -H 'X-User-Id: 1' \
+  -d '{"title":"Не работает почта","category":"Mail","priority":"High"}'
+```
+
 ## Проверки
 
 ```sh
