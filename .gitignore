@@ -12,6 +12,7 @@ __pycache__/
 *.sqlite-journal
 .env
 .env.*
+!.env.example
 *.log
 *:Zone.Identifier
 .opencode/
