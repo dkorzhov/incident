@@ -25,6 +25,6 @@ class Settings(BaseSettings):
         return self.test_database_url or self.database_url
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()

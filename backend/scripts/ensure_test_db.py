@@ -15,11 +15,21 @@ from sqlalchemy.engine import make_url
 SAFE_NAME = re.compile(r"^[A-Za-z0-9_]+$")
 
 
+def is_safe_name(value: str | None) -> bool:
+    """Имя уходит в DDL подстановкой, поэтому допускаем только буквы/цифры/подчёркивания."""
+    return bool(value) and SAFE_NAME.fullmatch(value) is not None
+
+
 def main(url_string: str) -> int:
     url = make_url(url_string)
     database = url.database
-    if not database or not SAFE_NAME.match(database):
+    if not is_safe_name(database):
         print(f"Некорректное имя тестовой БД: {database!r}", file=sys.stderr)
+        return 2
+
+    owner = url.username or "incident"
+    if not is_safe_name(owner):
+        print(f"Некорректное имя владельца тестовой БД: {owner!r}", file=sys.stderr)
         return 2
 
     admin_engine = create_engine(url.set(database="postgres"), isolation_level="AUTOCOMMIT")
@@ -30,7 +40,6 @@ def main(url_string: str) -> int:
         if exists:
             print(f"Тестовая БД {database} уже существует")
         else:
-            owner = url.username or "incident"
             connection.execute(text(f'CREATE DATABASE "{database}" OWNER "{owner}"'))
             print(f"Тестовая БД {database} создана")
     admin_engine.dispose()
