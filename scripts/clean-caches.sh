@@ -103,7 +103,17 @@ for path in "${all_paths[@]}"; do
       exit 2
       ;;
   esac
-  targets+=("${path#./}")
+  path="${path#./}"
+  # Защита от выхода за корень репозитория через '..' и пустые компоненты:
+  # критично для fallback rm -rf на хосте (run_with_rm).
+  IFS='/' read -r -a parts <<< "$path"
+  for part in "${parts[@]}"; do
+    if [[ -z "$part" || "$part" == "." || "$part" == ".." ]]; then
+      echo "Недопустимый компонент пути в: $path" >&2
+      exit 2
+    fi
+  done
+  targets+=("$path")
 done
 
 # Внутри контейнера /w — корень репозитория, пути уже относительные.

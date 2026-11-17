@@ -78,12 +78,19 @@ GitHub пересоздаёт коммиты A, ветка B остаётся с
    перецелить на `main` обычным `gh pr edit <B> --base main`.
 2. **После squash-мержа A сразу переписать B на `main`** — до любых правок в PR:
 
+   `<last-commit-of-A>` — голова ветки A **до мержа**; после squash SHA пересозданы,
+   поэтому сохрани хеш заранее: `gh pr view <A> --json headRefOid --jq .headRefOid`
+   (или `git rev-parse origin/feat/DMI-A-...` до мержа).
+
    ```sh
    git fetch origin
    git checkout feat/DMI-B-...
    git rebase --onto origin/main <last-commit-of-A> feat/DMI-B-...
    git push --force-with-lease origin feat/DMI-B-...
    ```
+
+   При rebase на squashed-коммит возможны конфликты (те же изменения, другие SHA) —
+   разрешай их вручную, не отменяй rebase отказом от правок B.
 
    `--force-with-lease` обязателен: он не даёт затереть чужие изменения ветки.
    После force-push PR B остаётся открытым и уже стоит на актуальном `main`;
@@ -114,7 +121,9 @@ GitHub пересоздаёт коммиты A, ветка B остаётся с
 6. Не удаляй и не ослабляй существующие тесты ради «зелёного» прогона.
 7. Текущий пользователь — заголовок `X-User-Id`, валидируется против списка users.
 8. Секреты и `.env` не коммитить.
-9. Кэши тестов/линта не оставляем в worktree: локальный venv или `--user` + `scripts/clean-caches.sh`
+9. Кэши не оставляем в worktree: локальный venv/npm ci, либо docker с `--user` **и**
+   env-переменными кэша (`RUFF_CACHE_DIR`, `PYTEST_ADDOPTS`, `HOME`); накопленные
+   root-owned кэши чистим `scripts/clean-caches.sh`
    (раздел «Кэши не должны оставаться в worktree»). Worktree с root-owned кэшами не удаляется.
 10. Stacked PR: мержим базу без squash либо сразу `rebase --onto` + `push --force-with-lease`
     (раздел «Stacked PR и squash-мерж базы»).

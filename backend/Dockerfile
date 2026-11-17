@@ -10,8 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # `orca worktree rm` после мержа падают с Permission denied (нужен sudo).
 # Значения можно переопределить при запуске: `-e RUFF_CACHE_DIR=...`.
 ENV RUFF_CACHE_DIR=/tmp/ruff-cache \
-    PYTEST_ADDOPTS="-o cache_dir=/tmp/pytest-cache" \
-    HOME=/tmp
+    PYTEST_ADDOPTS="-o cache_dir=/tmp/pytest-cache"
 
 WORKDIR /app
 
@@ -20,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN chmod +x entrypoint.sh
+
+# HOME переносим после этапов сборки: pip и прочие RUN не должны жить в /tmp.
+ENV HOME=/tmp
 
 EXPOSE 8000
 
