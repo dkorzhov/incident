@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     test_database_url: str | None = None
     # Origin'ы через запятую — для запуска фронтенда без прокси.
     cors_origins: str = "http://localhost:5173"
+    # Демо-инциденты на старте (TASK.md §6). По умолчанию выключено: обычный
+    # запуск и тесты не должны получать данные, которых не просили.
+    seed_demo: bool = False
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -1,5 +1,6 @@
 from app.models.base import Base
 from app.models.comment import Comment
+from app.models.demo_seed import DemoSeedState
 from app.models.history import HistoryEvent, HistoryEventType
 from app.models.incident import (
     DESCRIPTION_MAX_LENGTH,
@@ -24,6 +25,7 @@ __all__ = [
     "TITLE_MAX_LENGTH",
     "Base",
     "Comment",
+    "DemoSeedState",
     "HistoryEvent",
     "HistoryEventType",
     "Incident",
