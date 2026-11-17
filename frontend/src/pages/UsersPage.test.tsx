@@ -16,7 +16,10 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 function mockUsers(response: () => Response) {
-  vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(response())));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(response())),
+  );
 }
 
 afterEach(() => {

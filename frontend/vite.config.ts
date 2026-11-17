@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig, defaultExclude } from "vitest/config";
+import { defaultExclude, defineConfig } from "vitest/config";
 
 // В Docker прокси смотрит на сервис backend, локально — на localhost.
 // Переменная без префикса VITE_, чтобы внутренний URL не попадал в браузерный бандл.
