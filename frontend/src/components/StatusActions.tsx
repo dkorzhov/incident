@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useId, useState } from "react";
 
 import type { IncidentStatus } from "../api/types";
 import { RESOLUTION_MAX_LENGTH } from "../utils/labels";
@@ -29,6 +29,10 @@ export function StatusActions({
   pendingTarget,
   isRefreshing = false,
 }: StatusActionsProps) {
+  const uid = useId();
+  const resolutionId = `${uid}-resolution`;
+  const resolutionErrorId = `${uid}-resolution-error`;
+  const resolutionHintId = `${uid}-resolution-hint`;
   const [isResolveOpen, setIsResolveOpen] = useState(false);
   const [resolution, setResolution] = useState("");
   const [resolveError, setResolveError] = useState<string | null>(null);
@@ -111,18 +115,18 @@ export function StatusActions({
 
       {canResolveNow && isResolveOpen && (
         <form className="resolve-form" onSubmit={handleResolve} noValidate>
-          <label className="field__label" htmlFor="resolution">
+          <label className="field__label" htmlFor={resolutionId}>
             Описание решения (обязательно)
           </label>
           <textarea
-            id="resolution"
+            id={resolutionId}
             name="resolution"
             rows={4}
             value={resolution}
             maxLength={RESOLUTION_MAX_LENGTH}
             placeholder="Что сделали, чтобы проблема ушла"
             aria-invalid={Boolean(resolveError)}
-            aria-describedby={resolveError ? "resolution-error" : "resolution-hint"}
+            aria-describedby={resolveError ? resolutionErrorId : resolutionHintId}
             onChange={(event) => {
               setResolution(event.target.value);
               if (resolveError) {
@@ -131,11 +135,11 @@ export function StatusActions({
             }}
           />
           {resolveError ? (
-            <span className="field__error" id="resolution-error" role="alert">
+            <span className="field__error" id={resolutionErrorId} role="alert">
               {resolveError}
             </span>
           ) : (
-            <span className="field__hint" id="resolution-hint">
+            <span className="field__hint" id={resolutionHintId}>
               Попадёт в карточку и историю: «Решение: …». До {RESOLUTION_MAX_LENGTH} символов.
             </span>
           )}

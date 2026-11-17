@@ -22,7 +22,10 @@ export function fieldErrors(cause: unknown): Record<string, string> {
   }
   for (const error of cause.errors) {
     if (error.field && error.reason) {
-      result[error.field] = error.reason;
+      // Backend отдаёт snake_case (assignee_id), формы хранят camelCase
+      // (assigneeId) — нормализуем, чтобы ошибка снималась при правке поля.
+      const key = error.field.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+      result[key] = error.reason;
     }
   }
   return result;
