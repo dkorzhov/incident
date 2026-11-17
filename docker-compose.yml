@@ -23,6 +23,9 @@ services:
       DATABASE_URL: postgresql+psycopg://incident:incident@db:5432/incident
       TEST_DATABASE_URL: postgresql+psycopg://incident:incident@db:5432/incident_test
       CORS_ORIGINS: http://localhost:5173
+      # Демо-инциденты на старте (TASK.md §6): включается явно, по умолчанию
+      # выключено. Переопределяется из окружения/`.env`: SEED_DEMO=true.
+      SEED_DEMO: ${SEED_DEMO:-false}
     ports:
       - "8000:8000"
     depends_on:

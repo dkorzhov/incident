@@ -4,6 +4,6 @@
 поднимают доменные исключения. HTTP-слой (DMI-7) их только вызывает.
 """
 
-from app.services import history, incidents
+from app.services import history, incidents, seed
 
-__all__ = ["history", "incidents"]
+__all__ = ["history", "incidents", "seed"]
