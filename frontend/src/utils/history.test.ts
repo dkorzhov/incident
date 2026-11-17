@@ -42,4 +42,10 @@ describe("describeHistoryEvent", () => {
     expect(describeHistoryEvent("created", {})).toBe("Инцидент создан");
     expect(describeHistoryEvent("priority_changed", {})).toBe(HISTORY_TYPE_LABELS.priority_changed);
   });
+
+  it("переводит смену приоритета на русские подписи, не трогая значения enum", () => {
+    expect(
+      describeHistoryEvent("priority_changed", { priority: { from: "High", to: "Medium" } }),
+    ).toBe("Приоритет: Высокий → Средний");
+  });
 });
