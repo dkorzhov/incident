@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useParams } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Dashboard, Incident } from "../api/client";
@@ -227,4 +227,23 @@ describe("IncidentsPage — реестр", () => {
     expect(openKpi).not.toHaveTextContent("0");
     expect(screen.getByText("Показатели недоступны: Сервис недоступен")).toBeInTheDocument();
   });
+});
+
+function IdProbe() {
+  const { id } = useParams();
+  return <div>opened {id}</div>;
+}
+
+it("клик по строке реестра открывает карточку инцидента", async () => {
+  mockApi(INCIDENTS);
+  render(
+    <MemoryRouter initialEntries={["/incidents"]}>
+      <Routes>
+        <Route path="/incidents" element={<IncidentsPage />} />
+        <Route path="/incidents/:id" element={<IdProbe />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  fireEvent.click(await screen.findByText("Не работает почта"));
+  expect(await screen.findByText("opened INC-001")).toBeTruthy();
 });

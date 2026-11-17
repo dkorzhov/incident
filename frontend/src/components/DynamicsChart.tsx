@@ -109,7 +109,7 @@ export function DynamicsChart({ points }: DynamicsChartProps) {
                 x2={CHART_WIDTH - PADDING.right}
                 y1={y(value)}
                 y2={y(value)}
-                stroke="#e6ecf5"
+                stroke="var(--chart-grid)"
                 strokeWidth="1"
               />
               <text
@@ -126,7 +126,7 @@ export function DynamicsChart({ points }: DynamicsChartProps) {
           <polyline
             points={createdPath}
             fill="none"
-            stroke="#2f6fed"
+            stroke="var(--chart-created)"
             strokeWidth="2.5"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -134,7 +134,7 @@ export function DynamicsChart({ points }: DynamicsChartProps) {
           <polyline
             points={closedPath}
             fill="none"
-            stroke="#12805c"
+            stroke="var(--chart-closed)"
             strokeWidth="2.5"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -142,10 +142,10 @@ export function DynamicsChart({ points }: DynamicsChartProps) {
 
           {points.map((point, index) => (
             <g key={point.key}>
-              <circle cx={x(index)} cy={y(point.created)} r="3.5" fill="#2f6fed">
+              <circle cx={x(index)} cy={y(point.created)} r="3.5" fill="var(--chart-created)">
                 <title>{`${point.fullLabel}: создано ${point.created}`}</title>
               </circle>
-              <circle cx={x(index)} cy={y(point.closed)} r="3.5" fill="#12805c">
+              <circle cx={x(index)} cy={y(point.closed)} r="3.5" fill="var(--chart-closed)">
                 <title>{`${point.fullLabel}: закрыто ${point.closed}`}</title>
               </circle>
               <text

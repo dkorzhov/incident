@@ -24,6 +24,9 @@
   --priority-medium: #eaaa08;
   --priority-medium-bg: #fef7c3;
   --priority-medium-fg: #8a6100;
+  --chart-grid: #e6ecf5;
+  --chart-created: #2f6fed;
+  --chart-closed: #12805c;
   --priority-low: #3538cd;
   --priority-low-bg: #e0e7ff;
   --priority-low-fg: #3538cd;
