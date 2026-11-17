@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useId, useState } from "react";
 
 import type { Comment } from "../api/types";
 import { COMMENT_MAX_LENGTH, formatDateTime } from "../utils/labels";
@@ -46,6 +46,10 @@ interface CommentFormProps {
 
 /** Форма нового комментария: автор — текущий пользователь из `X-User-Id`. */
 export function CommentForm({ onSubmit, isSubmitting, disabledReason }: CommentFormProps) {
+  const uid = useId();
+  const commentId = `${uid}-comment-text`;
+  const commentErrorId = `${uid}-comment-error`;
+  const commentHintId = `${uid}-comment-hint`;
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -81,18 +85,18 @@ export function CommentForm({ onSubmit, isSubmitting, disabledReason }: CommentF
 
   return (
     <form className="comment-form" onSubmit={handleSubmit} noValidate>
-      <label className="field__label" htmlFor="comment-text">
+      <label className="field__label" htmlFor={commentId}>
         Новый комментарий
       </label>
       <textarea
-        id="comment-text"
+        id={commentId}
         name="comment"
         rows={3}
         value={text}
         maxLength={COMMENT_MAX_LENGTH}
         placeholder="Что уточнить или что уже сделано"
         aria-invalid={Boolean(error)}
-        aria-describedby={error ? "comment-error" : "comment-hint"}
+        aria-describedby={error ? commentErrorId : commentHintId}
         onChange={(event) => {
           setText(event.target.value);
           if (error) {
@@ -101,11 +105,11 @@ export function CommentForm({ onSubmit, isSubmitting, disabledReason }: CommentF
         }}
       />
       {error ? (
-        <span className="field__error" id="comment-error" role="alert">
+        <span className="field__error" id={commentErrorId} role="alert">
           {error}
         </span>
       ) : (
-        <span className="field__hint" id="comment-hint">
+        <span className="field__hint" id={commentHintId}>
           До {COMMENT_MAX_LENGTH} символов. Автор — текущий пользователь из шапки.
         </span>
       )}

@@ -27,6 +27,7 @@
   --chart-grid: #e6ecf5;
   --chart-created: #2f6fed;
   --chart-closed: #12805c;
+  --alert-warning-fg: #8a6100;
   --priority-low: #3538cd;
   --priority-low-bg: #e0e7ff;
   --priority-low-fg: #3538cd;
@@ -522,7 +523,7 @@ h3 {
   border-color: #fedf89;
   background: #fffaeb;
   /* `-fg` — тёмный янтарный: жёлтый акцент #eaaa08 на pale-yellow нечитаем. */
-  color: var(--priority-medium-fg);
+  color: var(--alert-warning-fg);
 }
 
 /* --- Table -------------------------------------------------------------- */
