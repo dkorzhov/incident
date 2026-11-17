@@ -66,7 +66,15 @@ def test_seed_resolved_today_is_counted_by_dashboard(db_session: Session) -> Non
         assert transition, f"у {incident.id} нет события перехода в Resolved за сегодня"
 
     counts = build_dashboard(db_session).counts
-    assert counts.resolved_today >= len(resolved)
+    # Точное равенство, а не «>=»: недосчёт дашборда должен падать. Ожидаемое
+    # число берём из состава набора, независимо от реализации дашборда:
+    # Closed-инцидент тоже прошёл через Resolved сегодня и считается.
+    expected = sum(
+        1
+        for spec in seed.DEMO_INCIDENTS
+        if spec.status in {IncidentStatus.Resolved, IncidentStatus.Closed}
+    )
+    assert counts.resolved_today == expected
 
 
 def test_seed_closed_incident_keeps_history_order(db_session: Session) -> None:

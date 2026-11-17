@@ -95,8 +95,10 @@ test.describe("Жизненный цикл инцидента", () => {
         response.request().method() === "PATCH",
     );
     await assigneeSelect.selectOption(assigneeValue as string);
-    expect((await assignResponse).status()).toBe(200);
+    // Сначала фиксируем выбор в UI, затем ждём ответ PATCH: порядок исключает
+    // гонку, когда ответ приходит раньше, чем селект обновился.
     await expect(assigneeSelect).toHaveValue(assigneeValue as string);
+    expect((await assignResponse).status()).toBe(200);
     await expect(page.locator(".incident-card__assignee")).not.toContainText("Не назначен");
 
     // --- взять в работу ---------------------------------------------------
@@ -153,6 +155,8 @@ test.describe("Жизненный цикл инцидента", () => {
     await expect(page.getByText("Инцидент создан")).toBeVisible();
     await expect(page.getByText("Назначение", { exact: true })).toBeVisible();
     await expect(page.getByText("Комментарий", { exact: true })).toBeVisible();
+    // В истории виден не только тип события, но и текст комментария.
+    await expect(page.getByText(`Добавлен комментарий: «${commentText}»`)).toBeVisible();
     await expect(page.getByText("Решение", { exact: true })).toBeVisible();
     await expect(page.getByText(resolutionText.slice(0, 40)).first()).toBeVisible();
 

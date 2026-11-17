@@ -173,6 +173,9 @@ def _claim_seed_slot(db: Session) -> bool:
     ``-1`` в ``rowcount``, а ``ON CONFLICT DO NOTHING`` без ``RETURNING`` не
     отличил бы «уже занято» от «вставлено». Пустой результат ``RETURNING`` —
     ключ уже есть.
+
+    Вызывать только в начале транзакции: ``rollback`` при занятом слоте
+    откатил бы и чужие незакоммиченные изменения сессии.
     """
     statement = (
         pg_insert(DemoSeedState)
